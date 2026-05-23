@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f0e0c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Без диму">
+<meta name="description" content="Трекер відмови від куріння">
+
+<title>Без диму</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --bg-soft: #1a1815;
+    --ink: #f5efe4;
+    --ink-dim: #a39d92;
+    --ink-faint: #6b6760;
+    --accent: #d97757;
+    --accent-warm: #e8b87a;
+    --line: #2a2722;
+    --green: #7fa67e;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100%;
+    min-height: 100dvh;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(217, 119, 87, 0.08), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(232, 184, 122, 0.06), transparent 50%);
+    padding-bottom: max(32px, calc(var(--safe-bottom) + 32px));
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    z-index: 100;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(var(--safe-top) + 20px) 0 20px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-left: -20px;
+    margin-right: -20px;
+  }
+
+  .brand {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  .brand span { color: var(--accent); }
+
+  .date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+  }
+
+  /* Hero counter */
+  .hero {
+    text-align: center;
+    padding: 32px 0 44px;
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 16px;
+  }
+
+  .hero-number {
+    font-size: clamp(72px, 22vw, 180px);
+    font-weight: 300;
+    line-height: 0.85;
+    font-feature-settings: 'ss01';
+    letter-spacing: -0.04em;
+    color: var(--ink);
+  }
+
+  .hero-number .colon {
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  .hero-unit {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: clamp(15px, 4vw, 18px);
+    color: var(--ink-dim);
+    margin-top: 16px;
+    font-weight: 300;
+  }
+
+  .hero-detail {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+    margin-top: 8px;
+  }
+
+  /* Quote */
+  .quote {
+    font-style: italic;
+    font-size: clamp(15px, 4vw, 18px);
+    color: var(--ink-dim);
+    text-align: center;
+    margin: 0 auto 40px;
+    max-width: 480px;
+    line-height: 1.5;
+    font-weight: 300;
+    padding: 0 8px;
+  }
+
+  .quote::before, .quote::after {
+    content: '—';
+    color: var(--accent);
+    margin: 0 10px;
+    font-style: normal;
+  }
+
+  /* SOS button */
+  .sos-section {
+    margin-bottom: 40px;
+  }
+
+  .sos-button {
+    width: 100%;
+    padding: 28px 24px;
+    background: linear-gradient(135deg, var(--accent), #c25e3f);
+    color: var(--bg);
+    border: none;
+    border-radius: 12px;
+    font-family: 'Fraunces', serif;
+    font-size: clamp(18px, 5vw, 22px);
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    box-shadow: 0 4px 24px rgba(217, 119, 87, 0.3);
+    letter-spacing: 0.02em;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    min-height: 88px;
+  }
+
+  .sos-button:hover { box-shadow: 0 8px 32px rgba(217, 119, 87, 0.45); }
+  .sos-button:active { transform: scale(0.98); opacity: 0.92; }
+
+  .sos-button small {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 6px;
+    opacity: 0.7;
+    font-weight: 400;
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+
+  .stat {
+    background: var(--bg);
+    padding: 20px 18px;
+    position: relative;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-size: clamp(28px, 8vw, 38px);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .stat-value .unit {
+    font-size: 13px;
+    color: var(--ink-dim);
+    font-style: italic;
+    font-weight: 300;
+    margin-left: 3px;
+  }
+
+  .stat-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--accent-warm);
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+  }
+
+  /* Section heading */
+  .section-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .section-heading h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(18px, 5vw, 24px);
+    font-style: italic;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .section-heading .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+
+  .section-heading .line {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+    min-width: 16px;
+  }
+
+  /* Timeline */
+  .timeline { margin-bottom: 40px; }
+
+  .milestone {
+    display: grid;
+    grid-template-columns: 72px 1fr auto;
+    gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+    transition: opacity 0.4s;
+  }
+
+  .milestone.locked { opacity: 0.35; }
+
+  .milestone-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-dim);
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+  }
+
+  .milestone-time.achieved { color: var(--accent); }
+
+  .milestone-body {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+
+  .milestone-body small {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  .milestone-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: right;
+  }
+
+  .milestone-status.locked { color: var(--ink-faint); }
+  .milestone-status.achieved { color: var(--green); }
+
+  .check {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-right: 5px;
+    vertical-align: middle;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .check::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 1px;
+    width: 4px;
+    height: 7px;
+    border: solid var(--bg);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  /* Reasons */
+  .reasons { margin-bottom: 40px; }
+
+  .reason-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .reason-item:last-child { border-bottom: none; }
+
+  .reason-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    margin-top: 3px;
+    min-width: 22px;
+    flex-shrink: 0;
+  }
+
+  .reason-text {
+    flex: 1;
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--ink);
+    font-weight: 400;
+  }
+
+  .reason-delete {
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    transition: color 0.2s;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    touch-action: manipulation;
+  }
+
+  .reason-delete:hover { color: var(--accent); }
+
+  .reason-add {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .reason-input {
+    flex: 1;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 14px 16px;
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 52px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .reason-input:focus { border-color: var(--accent); }
+
+  .reason-input::placeholder {
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  .btn-add {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    padding: 0 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+    min-height: 52px;
+    touch-action: manipulation;
+    white-space: nowrap;
+  }
+
+  .btn-add:hover, .btn-add:active { background: var(--accent); color: var(--bg); }
+
+  /* Settings */
+  .settings {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    padding: 0 20px;
+    border-radius: 12px;
+    margin-bottom: 32px;
+  }
+
+  .settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+    gap: 16px;
+    min-height: 60px;
+  }
+
+  .settings-row:last-child { border-bottom: none; }
+
+  .settings-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    flex: 1;
+    line-height: 1.4;
+  }
+
+  .settings-input {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    border-radius: 6px;
+    width: 88px;
+    text-align: right;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 44px;
+  }
+
+  .settings-input:focus { border-color: var(--accent); }
+
+  .btn-reset {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-faint);
+    padding: 10px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: color 0.2s, border-color 0.2s;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .btn-reset:hover, .btn-reset:active {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* SOS Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 14, 12, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+    animation: fadeIn 0.25s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 640px;
+    padding: 32px 24px;
+    padding-bottom: max(32px, calc(var(--safe-bottom) + 24px));
+    position: relative;
+    max-height: 92dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(60px); opacity: 0.7; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+    margin: 0 auto 24px;
+  }
+
+  .modal h3 {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(22px, 6vw, 28px);
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+
+  .modal .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .breathing-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 20px;
+    animation: breathe 8s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: scale(0.75); opacity: 0.6; }
+    50% { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-tips {
+    background: var(--bg);
+    border-left: 2px solid var(--accent);
+    padding: 14px 18px;
+    margin: 20px 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .modal-tips p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+  }
+
+  .modal-tips p:last-child { margin-bottom: 0; }
+
+  .modal-reasons { margin: 20px 0; }
+
+  .modal-reasons-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+
+  .modal-reason {
+    font-style: italic;
+    color: var(--accent-warm);
+    font-size: 16px;
+    padding: 5px 0;
+    line-height: 1.4;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn-survived {
+    flex: 1;
+    background: var(--green);
+    color: var(--bg);
+    border: none;
+    padding: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: opacity 0.2s;
+    min-height: 56px;
+    touch-action: manipulation;
+  }
+
+  .btn-survived:active { opacity: 0.85; }
+
+  .btn-close {
+    background: transparent;
+    color: var(--ink-dim);
+    border: 1px solid var(--line);
+    padding: 18px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 10px;
+    min-height: 56px;
+    touch-action: manipulation;
+  }
+
+  .btn-close:active { border-color: var(--accent); color: var(--accent); }
+
+  /* Install banner */
+  .install-banner {
+    display: none;
+    background: var(--bg-soft);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .install-banner.visible { display: flex; }
+
+  .install-banner-text {
+    flex: 1;
+    font-size: 14px;
+    color: var(--ink-dim);
+    line-height: 1.4;
+  }
+
+  .install-banner-text strong {
+    display: block;
+    color: var(--ink);
+    font-size: 15px;
+    margin-bottom: 2px;
+    font-weight: 500;
+  }
+
+  .btn-install {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 10px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 6px;
+    white-space: nowrap;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .btn-dismiss {
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px 8px;
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+
+  /* iOS install hint */
+  .ios-hint {
+    display: none;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .ios-hint.visible { display: block; }
+  .ios-hint strong { color: var(--ink); }
+
+  .footer {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.2em;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  /* Tablet and up */
+  @media (min-width: 600px) {
+    .modal-overlay {
+      align-items: center;
+      padding: 24px;
+    }
+
+    .modal {
+      border-radius: 12px;
+      max-height: 88vh;
+      padding: 40px 36px;
+    }
+
+    .modal-handle { display: none; }
+  }
+
+  /* Small phones */
+  @media (max-width: 374px) {
+    .container { padding: 0 14px; }
+    .header { padding-left: 14px; padding-right: 14px; margin-left: -14px; margin-right: -14px; }
+    .stat { padding: 16px 12px; }
+    .milestone { grid-template-columns: 60px 1fr; }
+    .milestone-status { display: none; }
+    .hero-number { font-size: 64px; }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="container">
+
+  <header class="header">
+    <div class="brand">без диму · <span>день <span id="brand-day">1</span></span></div>
+    <div class="date" id="today-date">—</div>
+  </header>
+
+  <!-- Install banner (Android/desktop) -->
+  <div class="install-banner" id="install-banner">
+    <div class="install-banner-text">
+      <strong>Додати на головний екран</strong>
+      Працює офлайн, завжди під рукою
+    </div>
+    <button class="btn-install" id="btn-install" onclick="installPWA()">додати</button>
+    <button class="btn-dismiss" onclick="dismissInstall()" aria-label="Закрити">×</button>
+  </div>
+
+  <!-- iOS install hint -->
+  <div class="ios-hint" id="ios-hint">
+    Щоб додати на головний екран: натисни <strong>Поділитись</strong> →
+    <strong>На початковий екран</strong>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-label">час без сигарети</div>
+    <div class="hero-number" id="hero-timer">00<span class="colon">:</span>00<span class="colon">:</span>00</div>
+    <div class="hero-unit" id="hero-days">щойно почав</div>
+    <div class="hero-detail" id="hero-detail">— перший день — найважчий —</div>
+  </section>
+
+  <p class="quote">тяга — це хвиля. вона приходить і вона йде. ти більше за неї</p>
+
+  <!-- SOS -->
+  <section class="sos-section">
+    <button class="sos-button" onclick="openSOS()">
+      хочеться курити
+      <small>натисни — і витримай 5 хвилин</small>
+    </button>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-grid">
+    <div class="stat">
+      <div class="stat-label">не викурено</div>
+      <div class="stat-value" id="not-smoked">0<span class="unit">шт</span></div>
+      <div class="stat-sub" id="not-smoked-sub">— пачок</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">збережено</div>
+      <div class="stat-value" id="saved"><span id="saved-amount">0</span><span class="unit">грн</span></div>
+      <div class="stat-sub" id="saved-sub">— що можна купити</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">нікотин у крові</div>
+      <div class="stat-value" id="nicotine">100<span class="unit">%</span></div>
+      <div class="stat-sub" id="nicotine-sub">— перші години —</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">витримано тяг</div>
+      <div class="stat-value" id="cravings-count">0</div>
+      <div class="stat-sub">— кожна = перемога</div>
+    </div>
+  </section>
+
+  <!-- BODY TIMELINE -->
+  <section class="timeline">
+    <div class="section-heading">
+      <span class="num">01</span>
+      <h2>тіло відновлюється</h2>
+      <div class="line"></div>
+    </div>
+    <div id="timeline-list"></div>
+  </section>
+
+  <!-- REASONS -->
+  <section class="reasons">
+    <div class="section-heading">
+      <span class="num">02</span>
+      <h2>навіщо я це роблю</h2>
+      <div class="line"></div>
+    </div>
+    <div id="reasons-list"></div>
+    <div class="reason-add">
+      <input type="text" class="reason-input" id="new-reason" placeholder="додати причину..." maxlength="120" enterkeyhint="done">
+      <button class="btn-add" onclick="addReason()">додати</button>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section>
+    <div class="section-heading">
+      <span class="num">03</span>
+      <h2>налаштування</h2>
+      <div class="line"></div>
+    </div>
+    <div class="settings">
+      <div class="settings-row">
+        <span class="settings-label">сигарет на день було</span>
+        <input type="number" class="settings-input" id="cigs-per-day" min="1" max="100" value="15" inputmode="numeric">
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">ціна пачки (грн)</span>
+        <input type="number" class="settings-input" id="pack-price" min="1" max="1000" value="90" inputmode="numeric">
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">сигарет у пачці</span>
+        <input type="number" class="settings-input" id="cigs-per-pack" min="1" max="50" value="20" inputmode="numeric">
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">скинути весь прогрес</span>
+        <button class="btn-reset" onclick="resetAll()">очистити</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">тримайся · день за днем</div>
+</div>
+
+<!-- SOS MODAL -->
+<div class="modal-overlay" id="sos-modal">
+  <div class="modal" id="sos-modal-inner">
+    <div class="modal-handle"></div>
+    <h3>дихай</h3>
+    <div class="subtitle">5 хвилин — і тяга піде</div>
+
+    <div class="breathing-circle" id="breathing-text">вдих</div>
+
+    <div class="modal-tips">
+      <p>→ випий склянку води повільно</p>
+      <p>→ вийди на 5 хвилин на свіже повітря</p>
+      <p>→ тяга триває 3–5 хвилин, потім спадає сама</p>
+    </div>
+
+    <div class="modal-reasons">
+      <div class="modal-reasons-title">згадай навіщо</div>
+      <div id="modal-reasons-list"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-survived" onclick="survivedCraving()">я витримав</button>
+      <button class="btn-close" onclick="closeSOS()">закрити</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+const STORAGE_KEY = 'quit-smoking-tracker-v1';
+
+const defaultState = {
+  startTime: null,
+  cigsPerDay: 15,
+  packPrice: 90,
+  cigsPerPack: 20,
+  cravingsSurvived: 0,
+  reasons: [
+    'запах від мене, одягу, з рота',
+    'задишка — хочу нормально дихати',
+    'здоров\'я — не хочу проблем у 30–40',
+    'дівчині неприємно',
+    'я не хочу залежати від цього'
+  ]
+};
+
+let state = loadState();
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return { ...defaultState, ...parsed };
+    }
+  } catch (e) {}
+  const fresh = { ...defaultState, startTime: Date.now() };
+  saveState(fresh);
+  return fresh;
+}
+
+function saveState(s = state) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  } catch (e) {}
+}
+
+const milestones = [
+  { hours: 0.33, title: '20 хв', body: 'пульс і тиск нормалізуються', sub: 'кровообіг повертається до базового' },
+  { hours: 8, title: '8 год', body: 'рівень чадного газу падає', sub: 'кисень у крові зростає' },
+  { hours: 24, title: '1 день', body: 'ризик інфаркту починає падати', sub: 'нікотин виходить з організму' },
+  { hours: 48, title: '2 дні', body: 'смак і нюх повертаються', sub: 'нервові закінчення загоюються' },
+  { hours: 72, title: '3 дні', body: 'дихати стає легше', sub: 'бронхи розслабляються' },
+  { hours: 24 * 14, title: '2 тижні', body: 'кровообіг кращий', sub: 'функція легень росте на 30%' },
+  { hours: 24 * 30, title: '1 місяць', body: 'кашель і задишка зменшуються', sub: 'війки в легенях відновлюються' },
+  { hours: 24 * 90, title: '3 місяці', body: 'витривалість значно вища', sub: 'легені набагато ефективніші' },
+  { hours: 24 * 365, title: '1 рік', body: 'ризик хвороб серця ↓ в 2×', sub: 'порівняно з людиною, що курить' }
+];
+
+function renderTimeline() {
+  const list = document.getElementById('timeline-list');
+  const elapsedH = (Date.now() - state.startTime) / 3600000;
+  list.innerHTML = milestones.map(m => {
+    const achieved = elapsedH >= m.hours;
+    return `
+      <div class="milestone ${achieved ? '' : 'locked'}">
+        <div class="milestone-time ${achieved ? 'achieved' : ''}">${m.title}</div>
+        <div class="milestone-body">${m.body}<small>${m.sub}</small></div>
+        <div class="milestone-status ${achieved ? 'achieved' : 'locked'}">
+          ${achieved ? '<span class="check"></span>досягнуто' : 'попереду'}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderReasons() {
+  const list = document.getElementById('reasons-list');
+  list.innerHTML = state.reasons.map((r, i) => `
+    <div class="reason-item">
+      <div class="reason-num">${String(i + 1).padStart(2, '0')}</div>
+      <div class="reason-text">${escapeHtml(r)}</div>
+      <button class="reason-delete" onclick="deleteReason(${i})" aria-label="Видалити">×</button>
+    </div>`).join('');
+
+  document.getElementById('modal-reasons-list').innerHTML = state.reasons.map(r =>
+    `<div class="modal-reason">→ ${escapeHtml(r)}</div>`).join('');
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function addReason() {
+  const input = document.getElementById('new-reason');
+  const val = input.value.trim();
+  if (!val) return;
+  state.reasons.push(val);
+  saveState();
+  input.value = '';
+  renderReasons();
+}
+
+function deleteReason(i) {
+  state.reasons.splice(i, 1);
+  saveState();
+  renderReasons();
+}
+
+document.getElementById('new-reason').addEventListener('keypress', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addReason(); }
+});
+
+['cigs-per-day', 'pack-price', 'cigs-per-pack'].forEach(id => {
+  const input = document.getElementById(id);
+  const key = id.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+  input.value = state[key];
+  input.addEventListener('change', () => {
+    const v = parseInt(input.value) || 1;
+    state[key] = v;
+    saveState();
+    updateStats();
+  });
+});
+
+function updateTimer() {
+  const elapsed = Date.now() - state.startTime;
+  const totalSec = Math.floor(elapsed / 1000);
+  const days = Math.floor(totalSec / 86400);
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const mins = Math.floor((totalSec % 3600) / 60);
+  const secs = totalSec % 60;
+  const pad = n => String(n).padStart(2, '0');
+
+  if (days > 0) {
+    document.getElementById('hero-timer').innerHTML =
+      `${days}<span class="colon">·</span>${pad(hours)}<span class="colon">:</span>${pad(mins)}`;
+    document.getElementById('hero-days').textContent =
+      `${days} ${pluralUA(days, 'день', 'дні', 'днів')} ${pad(hours)} год ${pad(mins)} хв`;
+    document.getElementById('hero-detail').textContent = '— разом це твоя перемога —';
+  } else {
+    document.getElementById('hero-timer').innerHTML =
+      `${pad(hours)}<span class="colon">:</span>${pad(mins)}<span class="colon">:</span>${pad(secs)}`;
+    document.getElementById('hero-days').textContent =
+      hours > 0 ? `${hours} ${pluralUA(hours, 'година', 'години', 'годин')} вже` : 'щойно почав';
+    document.getElementById('hero-detail').textContent = '— перший день — найважчий —';
+  }
+  document.getElementById('brand-day').textContent = days + 1;
+}
+
+function pluralUA(n, one, few, many) {
+  const m = n % 10, h = n % 100;
+  if (m === 1 && h !== 11) return one;
+  if (m >= 2 && m <= 4 && (h < 12 || h > 14)) return few;
+  return many;
+}
+
+function updateStats() {
+  const elapsedH = (Date.now() - state.startTime) / 3600000;
+  const elapsedD = elapsedH / 24;
+
+  const notSmoked = Math.floor(state.cigsPerDay * elapsedD);
+  const packs = (notSmoked / state.cigsPerPack).toFixed(1);
+  document.getElementById('not-smoked').innerHTML = `${notSmoked}<span class="unit">шт</span>`;
+  document.getElementById('not-smoked-sub').textContent =
+    `≈ ${packs} ${pluralUA(Math.floor(packs), 'пачка', 'пачки', 'пачок')}`;
+
+  const saved = Math.floor((state.packPrice / state.cigsPerPack) * notSmoked);
+  document.getElementById('saved-amount').textContent = saved;
+
+  let canBuy = '';
+  if (saved < 50) canBuy = '— тільки розпочав —';
+  else if (saved < 200) canBuy = `≈ ${Math.floor(saved / 80)} кав`;
+  else if (saved < 500) canBuy = '≈ обід у кафе';
+  else if (saved < 1500) canBuy = '≈ книга або подарунок';
+  else if (saved < 5000) canBuy = '≈ навушники чи квитки';
+  else if (saved < 15000) canBuy = '≈ невелика подорож';
+  else canBuy = '≈ серйозна покупка';
+  document.getElementById('saved-sub').textContent = canBuy;
+
+  const nicotinePercent = Math.max(0, 100 - (elapsedH / 72) * 100);
+  document.getElementById('nicotine').innerHTML = `${Math.floor(nicotinePercent)}<span class="unit">%</span>`;
+  document.getElementById('nicotine-sub').textContent =
+    nicotinePercent <= 0 ? '— чистий —' :
+    nicotinePercent < 50 ? '— виводиться —' : '— перші години —';
+
+  document.getElementById('cravings-count').textContent = state.cravingsSurvived;
+}
+
+function renderDate() {
+  const days = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'];
+  const months = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
+    'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'];
+  const d = new Date();
+  document.getElementById('today-date').textContent =
+    `${d.getDate()} ${months[d.getMonth()]} · ${days[d.getDay()]}`;
+}
+
+// SOS
+function openSOS() {
+  document.getElementById('sos-modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  startBreathing();
+  renderReasons();
+}
+
+function closeSOS() {
+  document.getElementById('sos-modal').classList.remove('active');
+  document.body.style.overflow = '';
+  stopBreathing();
+}
+
+function survivedCraving() {
+  state.cravingsSurvived++;
+  saveState();
+  updateStats();
+  closeSOS();
+}
+
+let breathInterval;
+function startBreathing() {
+  const text = document.getElementById('breathing-text');
+  const phases = ['вдих', 'затримай', 'видих', 'затримай'];
+  let i = 0;
+  text.textContent = phases[0];
+  breathInterval = setInterval(() => {
+    i = (i + 1) % phases.length;
+    text.textContent = phases[i];
+  }, 2000);
+}
+
+function stopBreathing() { clearInterval(breathInterval); }
+
+function resetAll() {
+  if (!confirm('Скинути весь прогрес? Це не можна відмінити.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = { ...defaultState, startTime: Date.now() };
+  saveState();
+  renderReasons();
+  renderTimeline();
+  updateStats();
+  ['cigs-per-day', 'pack-price', 'cigs-per-pack'].forEach(id => {
+    const key = id.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    document.getElementById(id).value = state[key];
+  });
+}
+
+// Close modal on overlay click (not inner modal)
+document.getElementById('sos-modal').addEventListener('click', e => {
+  if (e.target.id === 'sos-modal') closeSOS();
+});
+
+// Swipe down to close modal on mobile
+let touchStartY = 0;
+document.getElementById('sos-modal-inner').addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+document.getElementById('sos-modal-inner').addEventListener('touchmove', e => {
+  const delta = e.touches[0].clientY - touchStartY;
+  if (delta > 80 && document.getElementById('sos-modal-inner').scrollTop === 0) {
+    closeSOS();
+  }
+}, { passive: true });
+
+// PWA Install
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!localStorage.getItem('pwa-dismissed')) {
+    document.getElementById('install-banner').classList.add('visible');
+  }
+});
+
+async function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('install-banner').classList.remove('visible');
+}
+
+function dismissInstall() {
+  localStorage.setItem('pwa-dismissed', '1');
+  document.getElementById('install-banner').classList.remove('visible');
+}
+
+// iOS hint (only in Safari, not already installed)
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+function isInStandaloneMode() {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+}
+
+if (isIOS() && !isInStandaloneMode() && !localStorage.getItem('ios-hint-dismissed')) {
+  document.getElementById('ios-hint').classList.add('visible');
+  setTimeout(() => {
+    document.getElementById('ios-hint').classList.remove('visible');
+    localStorage.setItem('ios-hint-dismissed', '1');
+  }, 10000);
+}
+
+// Init
+renderDate();
+renderReasons();
+renderTimeline();
+updateStats();
+updateTimer();
+setInterval(updateTimer, 1000);
+setInterval(updateStats, 60000);
+setInterval(renderTimeline, 60000);
+setInterval(renderDate, 60000);
+</script>
+</body>
+</html>
